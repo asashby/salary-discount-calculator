@@ -103,6 +103,7 @@ const Home = props => {
                                     placeholder="Monthly Salary" 
                                     className="form-input" 
                                     type="number"
+                                    min="0"
                                     onChange={e => setMonthlySalary(e.target.value)}>
                                 </input>
                             </span>
@@ -120,6 +121,7 @@ const Home = props => {
                                     placeholder="Bonifications" 
                                     className="form-input" 
                                     type="number"
+                                    min="0"
                                     onChange={e => setBonifications(e.target.value)}>
                                 </input>
                             </span>
@@ -137,6 +139,7 @@ const Home = props => {
                                     placeholder="Extra hours" 
                                     className="form-input" 
                                     type="number"
+                                    min="0"
                                     onChange={e => setExtraHours(e.target.value)}>
                                 </input>
                             </span>
