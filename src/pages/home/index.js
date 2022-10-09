@@ -1,7 +1,82 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import './styles.scss';
 
 const Home = props => {
+    const [monthlySalary, setMonthlySalary] = useState('');
+    const [bonifications, setBonifications] = useState('');
+    const [extraHours, setExtraHours] = useState('');
+    const [afpTotal, setAfpTotal] = useState('');
+    const [healthInsuranceTotal, setHealthInsuranceTotal] = useState('');
+    const [taxesTotal, setTaxesTotal] = useState('');
+    const [totalDiscount, setTotalDiscount] = useState('');
+    const [netSalary, setNetSalary] = useState('');
+    const [totalRawSalary, setTotalRawSalary] = useState('');
+
+    const handleFormSubmit = event => {
+        event.preventDefault();
+
+        calcAfpAndHealthInsurance();
+
+        calcTaxes();
+    }
+
+    const calcAfpAndHealthInsurance = () => {
+        let afpTotalCalc = (parseFloat(monthlySalary) + parseFloat(bonifications)) * 0.0304;
+        let healthInsuranceTotalCalc = (parseFloat(monthlySalary) + parseFloat(bonifications)) * 0.0287;
+
+        if(afpTotalCalc > 4742.40){
+            afpTotalCalc = 4742.40;
+        }
+
+        if(healthInsuranceTotalCalc > 8954.40){
+            healthInsuranceTotalCalc = 8954.40;
+        }
+
+        setAfpTotal(afpTotalCalc);
+        setHealthInsuranceTotal(healthInsuranceTotalCalc);
+    }
+
+    const calcTaxes = () => {
+        let rawSalary = parseFloat(monthlySalary) + parseFloat(bonifications);
+        let initialDiscount = (rawSalary * 0.0304) + (rawSalary * 0.0287);
+        let netSalaryIncludingTaxes = (rawSalary + parseFloat(extraHours)) - initialDiscount;
+
+        netSalaryIncludingTaxes = netSalaryIncludingTaxes * 12;
+
+        setTotalRawSalary(rawSalary + parseFloat(extraHours));
+
+        if(netSalaryIncludingTaxes <= 416220.00){
+            setTaxesTotal(0);
+            setTotalDiscount(initialDiscount);
+            setNetSalary(netSalaryIncludingTaxes / 12);
+
+            console.log(afpTotal + " " + healthInsuranceTotal);
+        } else if (netSalaryIncludingTaxes > 416220.00 && netSalaryIncludingTaxes <= 624329.00) {
+            let surplusPercent = ((netSalaryIncludingTaxes - 416220.01) * 0.15) / 12;
+
+            setTaxesTotal(surplusPercent);
+            setTotalDiscount(initialDiscount + surplusPercent);
+            setNetSalary((netSalaryIncludingTaxes / 12) - surplusPercent);
+
+        } else if (netSalaryIncludingTaxes > 624329.00 && netSalaryIncludingTaxes <= 867123.00) {
+            let surplusPercent = ((netSalaryIncludingTaxes - 624329.01) * 0.20) / 12 + (31216.00 / 12);
+
+            setTaxesTotal(surplusPercent);
+            setTotalDiscount(initialDiscount + surplusPercent);
+            setNetSalary((netSalaryIncludingTaxes / 12) - surplusPercent);
+
+        } else if (netSalaryIncludingTaxes > 867123.00) {
+            let surplusPercent = ((netSalaryIncludingTaxes - 867123.01) * 0.25) / 12 + (79776.00 / 12);
+
+            setTaxesTotal(surplusPercent);
+            setTotalDiscount(initialDiscount + surplusPercent);
+            setNetSalary((netSalaryIncludingTaxes / 12) - surplusPercent);
+
+        } else {
+            console.log("Cantidad invalida");
+        }
+    }
+
     return(
         <div className="main-wrapper">
             <div className="content-wrapper">
@@ -11,7 +86,7 @@ const Home = props => {
                     </p>
                 </div>
                 <div className="form-wrapper">
-                    <form className="form">
+                    <form className="form" onSubmit={handleFormSubmit}>
                         <p className="form-title-text">
                             Input
                         </p>
@@ -22,7 +97,13 @@ const Home = props => {
                             </label>
                             <br/>
                             <span className="salary-span">
-                                <input id="salary-input" placeholder="Monthly Salary" className="form-input" type="number">
+                                <input 
+                                    id="salary-input" 
+                                    value={monthlySalary} 
+                                    placeholder="Monthly Salary" 
+                                    className="form-input" 
+                                    type="number"
+                                    onChange={e => setMonthlySalary(e.target.value)}>
                                 </input>
                             </span>
                         </p>
@@ -33,7 +114,13 @@ const Home = props => {
                             </label>
                             <br/>
                             <span className="bonifications-span">
-                                <input id="bonifications-input" placeholder="Bonifications" className="form-input" type="number">
+                                <input 
+                                    id="bonifications-input" 
+                                    value={bonifications} 
+                                    placeholder="Bonifications" 
+                                    className="form-input" 
+                                    type="number"
+                                    onChange={e => setBonifications(e.target.value)}>
                                 </input>
                             </span>
                         </p>
@@ -44,12 +131,20 @@ const Home = props => {
                             </label>
                             <br/>
                             <span className="extra-hours-span">
-                                <input id="extra-hours-input" placeholder="Extra hours" className="form-input" type="number">
+                                <input 
+                                    id="extra-hours-input" 
+                                    value={extraHours} 
+                                    placeholder="Extra hours" 
+                                    className="form-input" 
+                                    type="number"
+                                    onChange={e => setExtraHours(e.target.value)}>
                                 </input>
                             </span>
                         </p>
                         <br/>
-                        <button className="calculate-button" type="submit">
+                        <button 
+                            className="calculate-button" 
+                            type="submit">
                             Calculate
                         </button>
                     </form>
@@ -61,10 +156,18 @@ const Home = props => {
                     <div className="results-content-wrapper">
                         <div className="results-content-row">
                             <p className="results-content-text bold">
+                                Monthly raw income:
+                            </p>
+                            <p className="results-content-text">
+                                ${totalRawSalary ? totalRawSalary.toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') : 0.00.toFixed(2)} 
+                            </p>
+                        </div>
+                        <div className="results-content-row">
+                            <p className="results-content-text bold">
                                 AFP:
                             </p>
                             <p className="results-content-text">
-                                result 
+                                ${afpTotal ? afpTotal.toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') : 0.00.toFixed(2)} 
                             </p>
                         </div>
                         <div className="results-content-row">
@@ -72,7 +175,7 @@ const Home = props => {
                                 Health Insurance (SFS): 
                             </p>
                             <p className="results-content-text">
-                                result 
+                                ${healthInsuranceTotal ? healthInsuranceTotal.toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') : 0.00.toFixed(2)} 
                             </p>
                         </div>
                         <div className="results-content-row">
@@ -80,7 +183,7 @@ const Home = props => {
                                 Taxes: 
                             </p>
                             <p className="results-content-text">
-                                result 
+                                ${taxesTotal ? taxesTotal.toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') : 0.00.toFixed(2)}
                             </p>
                         </div>
                         <div className="results-content-row">
@@ -88,7 +191,7 @@ const Home = props => {
                                 Total discount:  
                             </p>
                             <p className="results-content-text">
-                                result 
+                                ${totalDiscount ? (totalDiscount.toFixed(2)).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') : 0.00.toFixed(2)}
                             </p>
                         </div>
                         <div className="results-content-row">
@@ -96,7 +199,7 @@ const Home = props => {
                                 Monthly net salary:  
                             </p>
                             <p className="results-content-text">
-                                result 
+                                ${netSalary ? netSalary.toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') : 0.00.toFixed(2)}
                             </p>
                         </div>
                     </div>
