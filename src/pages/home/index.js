@@ -21,8 +21,16 @@ const Home = props => {
     }
 
     const calcAfpAndHealthInsurance = () => {
-        let afpTotalCalc = (parseFloat(monthlySalary) + parseFloat(bonifications)) * 0.0304;
-        let healthInsuranceTotalCalc = (parseFloat(monthlySalary) + parseFloat(bonifications)) * 0.0287;
+        let afpTotalCalc = 0;
+        let healthInsuranceTotalCalc = 0;
+
+        if (bonifications === null || bonifications.trim() === "") {
+            afpTotalCalc = parseFloat(monthlySalary) * 0.0304;
+            healthInsuranceTotalCalc = parseFloat(monthlySalary) * 0.0287;
+        } else {
+            afpTotalCalc = (parseFloat(monthlySalary) + parseFloat(bonifications)) * 0.0304;
+            healthInsuranceTotalCalc = (parseFloat(monthlySalary) + parseFloat(bonifications)) * 0.0287;
+        }
 
         if(afpTotalCalc > 4742.40){
             afpTotalCalc = 4742.40;
@@ -37,13 +45,28 @@ const Home = props => {
     }
 
     const calcTaxes = () => {
-        let rawSalary = parseFloat(monthlySalary) + parseFloat(bonifications);
+        let rawSalary = 0;
+
+        if (bonifications === null || bonifications.trim() === "") {
+            rawSalary = parseFloat(monthlySalary);
+        } else {
+            rawSalary = parseFloat(monthlySalary) + parseFloat(bonifications);
+        }
+
         let initialDiscount = (rawSalary * 0.0304) + (rawSalary * 0.0287);
-        let netSalaryIncludingTaxes = (rawSalary + parseFloat(extraHours)) - initialDiscount;
+        let netSalaryIncludingTaxes = 0;
+
+        if (extraHours === null || extraHours.trim() === "") {
+            netSalaryIncludingTaxes = rawSalary - initialDiscount;
+            setTotalRawSalary(rawSalary);
+        } else {
+            netSalaryIncludingTaxes = (rawSalary + parseFloat(extraHours)) - initialDiscount;
+            setTotalRawSalary(rawSalary + parseFloat(extraHours));
+        }
+        
+        
 
         netSalaryIncludingTaxes = netSalaryIncludingTaxes * 12;
-
-        setTotalRawSalary(rawSalary + parseFloat(extraHours));
 
         if(netSalaryIncludingTaxes <= 416220.00){
             setTaxesTotal(0);
